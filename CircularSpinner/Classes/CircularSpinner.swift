@@ -45,6 +45,7 @@ open class CircularSpinner: UIView {
     fileprivate var progressCircleLayer = CAShapeLayer()
     
     var indeterminateDuration: Double = 1.5
+    fileprivate static let determinateDuration: Double = 0.66
     
     fileprivate var startAngle: CGFloat {
         return CGFloat(M_PI_2)
@@ -275,17 +276,21 @@ open class CircularSpinner: UIView {
     
     
     // MARK: - update
-    open class func setValue(_ value: Float, animated: Bool) {
+    open class func setValue(_ value: Float, animated: Bool, duration: Double) {
         let spinner = CircularSpinner.sharedInstance
         guard spinner.type == .determinate else { return }
         
         spinner.value = value
         spinner.updateTitleLabel()
-        spinner.setStrokeEnd(animated: animated) {
+        spinner.setStrokeEnd(animated: animated, duration: duration) {
             if value >= 1 {
                 CircularSpinner.hide()
             }
         }
+    }
+    
+    open class func setValue(_ value: Float, animated: Bool) {
+        setValue(value, animated: animated, duration: determinateDuration)
     }
     
     fileprivate func updateTitleLabel() {
@@ -298,7 +303,7 @@ open class CircularSpinner: UIView {
         }
     }
     
-    fileprivate func setStrokeEnd(animated: Bool, completed: (() -> Void)? = nil) {
+    fileprivate func setStrokeEnd(animated: Bool, duration: Double, completed: (() -> Void)? = nil) {
         let spinner = CircularSpinner.sharedInstance
         
         CATransaction.begin()
@@ -308,7 +313,7 @@ open class CircularSpinner: UIView {
         })
         
         let strokeAnimation = CABasicAnimation(keyPath: "strokeEnd")
-        strokeAnimation.duration = animated ? 0.66 : 0
+        strokeAnimation.duration = animated ? duration : 0.0
         strokeAnimation.repeatCount = 1
         strokeAnimation.fromValue = oldStrokeEnd ?? 0
         strokeAnimation.toValue = spinner.value
